@@ -71,6 +71,16 @@ class InteractiveImageProcessor:
 
     def process_image(self, event):
 
+        # Function to find divisors
+        def find_divisors(n):
+            divisors = []
+            for i in range(1, int(n ** 0.5) + 1):
+                if n % i == 0:
+                    divisors.append(i)
+                    if i != n // i:
+                        divisors.append(n // i)
+            return sorted(divisors)
+
         def pixelate_image(image, pixel_size):
             if pixel_size <= 1:
                 return self.image
@@ -108,7 +118,8 @@ class InteractiveImageProcessor:
 
         # Slider for adjusting pixel size
         ax_slider = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor='lightgoldenrodyellow')
-        slider = Slider(ax_slider, 'Pixel Size', 1, imsize/2, valinit=10, valstep=1)
+        # slider = Slider(ax_slider, 'Pixel Size', 1, imsize/2, valinit=10, valstep=1)
+        slider = Slider(ax_slider, 'Pixel Size', 1, imsize/2, valinit=1, valstep=find_divisors(imsize))
         slider.on_changed(update)
 
         plt.show()
