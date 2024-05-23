@@ -25,7 +25,7 @@ class InteractiveImageProcessor:
         self.btn_process.on_clicked(self.process_image)
 
         # Slider for adjusting point radius
-        self.radius_slider = Slider(slider_ax, 'Radius', 1, 20, valinit=5, valstep=1)
+        self.radius_slider = Slider(slider_ax, 'Object size', 1, 20, valinit=5, valstep=1)
         self.radius_slider.on_changed(self.update_image_based_on_radius)
 
     def __call__(self, event):
@@ -50,6 +50,8 @@ class InteractiveImageProcessor:
         self.ax.figure.canvas.draw_idle()
 
     def process_image(self, event):
+
+        self.image = np.flipud(self.image)
 
         if self.plot_created:
             plt.close(self.plot_figure)
@@ -93,10 +95,12 @@ class InteractiveImageProcessor:
 
         # Add sliders for interactive control
         axcolor = 'lightgoldenrodyellow'
-        ax_spread = plt.axes([0.1, 0.1, 0.65, 0.03], facecolor=axcolor)
-        ax_balance = plt.axes([0.1, 0.15, 0.65, 0.03], facecolor=axcolor)
-        ax_noise = plt.axes([0.1, 0.05, 0.65, 0.03], facecolor=axcolor)
+        ax_pointsize = plt.axes([0.1, 0.2, 0.65, 0.03], facecolor=axcolor)
+        ax_spread = plt.axes([0.1, 0.15, 0.65, 0.03], facecolor=axcolor)
+        ax_balance = plt.axes([0.1, 0.05, 0.65, 0.03], facecolor=axcolor)
+        ax_noise = plt.axes([0.1, 0.1, 0.65, 0.03], facecolor=axcolor)
 
+        s_pointsize = Slider(ax_pointsize, 'Object size', 1, 20, valinit=5, valstep=1)
         s_spread = Slider(ax_spread, 'PSF Spread', 5, 50, valinit=initial_spread)
         s_balance = Slider(ax_balance, 'Wiener Balance', 0, 0.5, valinit=initial_balance)
         s_noise = Slider(ax_noise, 'Noise Level', 0, 0.01, valinit=initial_noise)
@@ -104,6 +108,11 @@ class InteractiveImageProcessor:
         # Add Radio Buttons for method selection
         rax = plt.axes([0.7, 0.4, 0.15, 0.15], facecolor=axcolor)
         radio = RadioButtons(rax, ('Wiener', 'Unsupervised Wiener', 'Inverse', 'Iterative'))
+
+        def change_object_size(val):
+            self.update_image_based_on_radius(s_pointsize.val)
+            img_original.set_data(np.flipud(self.image))
+            update(0)
 
         def update(val):
             spread = s_spread.val
@@ -133,17 +142,17 @@ class InteractiveImageProcessor:
             # print('noisy')
             # print(noisy_blurred.dtype)
             if method == 'Wiener':
-                print('in wiener')
+                # print('in wiener')
                 deconvolved = wiener(noisy_blurred, psf, balance)
             elif method == 'Inverse':
-                print('in inverse')
+                # print('in inverse')
                 # deconvolved = deconvolve2d(blurred,psf)
                 f_psf = rfft2(psf, s=noisy_blurred.shape)
                 f_blurred = rfft2(object)*f_psf
                 f_noise = rfft2(noise_component)
 
-                print('any zeros')
-                print(np.any(f_psf == 0))
+                # print('any zeros')
+                # print(np.any(f_psf == 0))
                 with np.errstate(divide='ignore', invalid='ignore'):
                     f_deconvolved =  f_blurred / f_psf + f_noise / f_psf
                     # f_deconvolved = np.nan_to_num(f_deconvolved)
@@ -169,6 +178,7 @@ class InteractiveImageProcessor:
             fig.canvas.draw_idle()
 
         # Call update function on slider value change
+        s_pointsize.on_changed(change_object_size)
         s_spread.on_changed(update)
         s_balance.on_changed(update)
         s_noise.on_changed(update)
