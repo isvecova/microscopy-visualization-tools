@@ -40,9 +40,45 @@ The script demonstrates the need for having small enough pixels when representin
 
     File: Pixel_sampling_animation.py
 
+## Installation
+
+To run these scripts, you will need Python installed on your system, along with several packages.
+
+### Prerequisites
+
+- Python 3.6 or higher
+- pip (Python package installer)
+- Git (Version control system)
+
+### Clone the repository
+
+First, clone the repository using Git:
+
+git clone https://github.com/isvecova/microscopy-visualization-tools.git
+cd microscopy-visualization-tools
+
+### Set up a virtual environment (Recommended)
+
+python -m venv venv
+source venv/bin/activate  # On Unix or MacOS
+venv\Scripts\activate  # On Windows
+
+### Install required packages
+
+pip install -r requirements.txt
+
+### Ensure tkinker library is available
+
+tkinter is part of the standard Python library. If your installation of Python doesn't include tkinter, you may need to install it separately. 
+
 ## Usage
 
-To run any of the scripts, navigate to the repository directory and execute the script using Python. 
+After installation, you can run the scripts directly from the command line:
+
+python script-name.py
+
+Replace script-name with the name of the script you wish to run.
+
 
 ## Contributing
 
