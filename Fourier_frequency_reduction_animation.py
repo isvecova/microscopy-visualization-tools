@@ -1,9 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.io import imread, imshow
-from skimage.color import rgb2hsv, rgb2gray, rgb2yuv
+from skimage.io import imread
+from skimage.color import rgb2gray
 from skimage import color, exposure, transform
-from skimage.exposure import equalize_hist
 from skimage import exposure
 
 import os
@@ -13,20 +12,33 @@ from matplotlib.widgets import Button, Slider
 import tkinter as tk
 from tkinter import filedialog
 
-#os.chdir('C:\\Users\\iva.svecova\\Documents\\Fourier_testing')
-os.chdir("C:\\Users\\sveco\\Documents\\Fourier_testing\\")
+# Get the directory where the script is located
+script_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Function to load and preprocess the image
 def load_image(filepath):
     image = imread(filepath)
-    print(image.shape)
     if image.shape[2] == 3:
-        print('rgb')
         image = rgb2gray(image)
-    else: 
-        print('not rgb')
     image = exposure.rescale_intensity(image, out_range='float64')
     return image
+
+def visualize_image(image, percentage):
+    global fig, ax, fo, fa, io, ia
+
+    fourier_orig, fourier_masked, image_filtered = process_images(image, percentage)
+
+    io = ax[0].imshow(image, cmap = 'gray')
+    ax[0].set_title('Greyscale Image', fontsize = f_size)
+    fo = ax[1].imshow(np.log(abs(fourier_orig)), cmap='gray')
+    ax[1].set_title('Original Fourier', fontsize = f_size)
+    fa = ax[2].imshow(np.log(abs(fourier_masked)), cmap='gray')
+    ax[2].set_title('Masked Fourier', fontsize = f_size)
+    ia = ax[3].imshow(abs(image_filtered), cmap='gray')
+    ax[3].set_title('Transformed Greyscale Image', fontsize = f_size)
+    for i in range(0,4):
+        ax[i].set_xticks([])
+        ax[i].set_yticks([])
 
 def change_image(event):
     global image, fig, ax, fo, fa, io, ia
@@ -35,30 +47,19 @@ def change_image(event):
     file_path = filedialog.askopenfilename()
     if file_path:
         image = load_image(file_path)
-        fourier_orig, fourier_masked, image_filtered = process_images(image, freq_slider.val)
-        
+
         # Clear the current axes
         for a in ax:
             a.clear()
-        
-        # Create new subplots with updated images
-        fo = ax[0].imshow(np.log(abs(fourier_orig)), cmap='gray')
-        ax[0].set_title('Original Fourier', fontsize=f_size)
-        fa = ax[1].imshow(np.log(abs(fourier_masked)), cmap='gray')
-        ax[1].set_title('Masked Fourier', fontsize=f_size)
-        io = ax[2].imshow(image, cmap='gray')
-        ax[2].set_title('Greyscale Image', fontsize=f_size)
-        ia = ax[3].imshow(abs(image_filtered), cmap='gray')
-        ax[3].set_title('Transformed Greyscale Image', fontsize=f_size)
-        for i in range(4):
-            ax[i].set_xticks([])
-            ax[i].set_yticks([])
+
+        visualize_image(image, freq_slider.val)
 
         fig.canvas.draw_idle()
 
 
 # Load the initial image
-initial_image_path = "sine.jpg"
+initial_image_file_name = "fourier_testing_images/wave.jpg"
+initial_image_path = os.path.join(script_directory, initial_image_file_name)
 image = load_image(initial_image_path)
 percentage = 10
 f_size = 15
@@ -100,23 +101,9 @@ def process_images(image, percentage):
 
     return fourier_orig,fourier_masked,image_filtered
 
-fourier_orig,fourier_masked,image_filtered = process_images(image,percentage)
+fig, ax = plt.subplots(1,4,figsize=(15,5))
 
-fig, ax = plt.subplots(1,4,figsize=(30,10))
-fo = ax[0].imshow(np.log(abs(fourier_orig)), cmap='gray')
-ax[0].set_title('Original Fourier', fontsize = f_size)
-fa = ax[1].imshow(np.log(abs(fourier_masked)), cmap='gray')
-ax[1].set_title('Masked Fourier', fontsize = f_size)
-io = ax[2].imshow(image, cmap = 'gray')
-ax[2].set_title('Greyscale Image', fontsize = f_size)
-ia = ax[3].imshow(abs(image_filtered), 
-                    cmap='gray')
-ax[3].set_title('Transformed Greyscale Image', 
-                    fontsize = f_size)
-#for i in range(0,4):
-#    ax[i].set_xticks([])
-#    ax[i].set_yticks([])
-
+visualize_image(image, percentage)
 
 # adjust the main plot to make room for the sliders
 fig.subplots_adjust(left=0.05)
@@ -125,7 +112,7 @@ fig.subplots_adjust(left=0.05)
 axfreq = fig.add_axes([0.02, 0.1, 0.01, 0.8])
 freq_slider = Slider(
     ax=axfreq,
-    label='Percentage',
+    label='Reduction',
     valmin=0.1,
     valmax=100,
     valinit=percentage,
@@ -146,7 +133,7 @@ def update(val):
     fig.canvas.draw_idle()
 
 
-# register the update function with each slider
+# register the update function with the slider
 freq_slider.on_changed(update)
 
 # Register the change image function with the button
