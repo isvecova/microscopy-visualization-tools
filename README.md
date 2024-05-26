@@ -46,7 +46,7 @@ To run any of the scripts, navigate to the repository directory and execute the 
 
 ## Contributing
 
-Contributions to this project are welcome! If you have any suggestions or questions, please contact me on isvecova47@gmail.com
+Contributions to this project are welcome! If you have any suggestions or questions, please contact me on svecovaiva01@gmail.com
 
 ## License
 
