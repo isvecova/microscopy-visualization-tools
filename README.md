@@ -55,12 +55,15 @@ To run these scripts, you will need Python installed on your system, along with 
 First, clone the repository using Git:
 
 git clone https://github.com/isvecova/microscopy-visualization-tools.git
+
 cd microscopy-visualization-tools
 
 ### Set up a virtual environment (Recommended)
 
 python -m venv venv
+
 source venv/bin/activate  # On Unix or MacOS
+
 venv\Scripts\activate  # On Windows
 
 ### Install required packages
